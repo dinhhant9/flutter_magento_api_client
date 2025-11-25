@@ -1,0 +1,35 @@
+// Magento API Client - A comprehensive Flutter package for connecting to Magento REST API
+// 
+// This package provides a complete solution for integrating Magento e-commerce
+// functionality into Flutter applications with support for OAuth1, Admin Token,
+// and Guest authentication.
+
+// API
+export 'api/api_client.dart';
+export 'api/auth_type.dart';
+
+// Models
+export 'models/customer.dart';
+export 'models/product.dart';
+export 'models/cart.dart';
+export 'models/order.dart';
+export 'models/category.dart';
+
+// Services
+export 'services/customer_service.dart';
+export 'services/product_service.dart';
+export 'services/cart_service.dart';
+export 'services/order_service.dart';
+export 'services/category_service.dart';
+
+// Storage
+export 'storage/storage_manager.dart';
+
+// Constants
+export 'constants/api_endpoints.dart';
+export 'constants/storage_keys.dart';
+export 'constants/api_constants.dart';
+
+// Utils
+export 'utils/api_exception.dart';
+export 'utils/response_handler.dart';
