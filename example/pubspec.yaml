@@ -1,0 +1,23 @@
+name: magento_api_client_example
+description: Example application showing how to use the magento_api_client package.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  magento_api_client:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+

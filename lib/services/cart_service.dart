@@ -5,7 +5,7 @@ import '../storage/storage_manager.dart';
 
 /// Service for cart-related operations
 class CartService {
-  final MagentoApiClient _client = MagentoApiClient.instance;
+  final NetworkClient _client = NetworkClient.instance;
 
   /// Create guest cart
   Future<String> createGuestCart() async {

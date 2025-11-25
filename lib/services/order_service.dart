@@ -4,7 +4,7 @@ import '../models/order.dart';
 
 /// Service for order-related operations
 class OrderService {
-  final MagentoApiClient _client = MagentoApiClient.instance;
+  final NetworkClient _client = NetworkClient.instance;
 
   /// Get orders for current customer
   Future<List<Order>> getMyOrders({

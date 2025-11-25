@@ -32,8 +32,8 @@ class MagentoApiConfig {
 }
 
 /// Singleton API client for Magento REST API
-class MagentoApiClient {
-  static MagentoApiClient? _instance;
+class NetworkClient {
+  static NetworkClient? _instance;
   late String _baseUrl;
   AuthType _authType = AuthType.guest;
   String? _adminToken;
@@ -46,11 +46,11 @@ class MagentoApiClient {
   Duration _timeout = const Duration(seconds: ApiConstants.defaultTimeout);
 
   // Private constructor
-  MagentoApiClient._();
+  NetworkClient._();
 
   /// Get singleton instance
-  static MagentoApiClient get instance {
-    _instance ??= MagentoApiClient._();
+  static NetworkClient get instance {
+    _instance ??= NetworkClient._();
     return _instance!;
   }
 

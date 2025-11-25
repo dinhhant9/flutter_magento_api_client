@@ -4,7 +4,7 @@ import '../models/product.dart';
 
 /// Service for product-related operations
 class ProductService {
-  final MagentoApiClient _client = MagentoApiClient.instance;
+  final NetworkClient _client = NetworkClient.instance;
 
   /// Get products with pagination and filters
   Future<List<Product>> getProducts({

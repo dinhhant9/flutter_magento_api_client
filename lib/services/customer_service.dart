@@ -5,7 +5,7 @@ import '../storage/storage_manager.dart';
 
 /// Service for customer-related operations
 class CustomerService {
-  final MagentoApiClient _client = MagentoApiClient.instance;
+  final NetworkClient _client = NetworkClient.instance;
 
   /// Customer login
   Future<String> login(String email, String password) async {

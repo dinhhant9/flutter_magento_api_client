@@ -29,27 +29,12 @@ flutter pub get
 
 ## Getting Started
 
-### Initialize the Client
-
-Before using the package, you need to initialize the API client with your Magento store configuration.
-
-#### Guest Access (No Authentication)
+Create a single `MagentoApiClient` instance and keep it for the lifetime of your app.
 
 ```dart
 import 'package:magento_api_client/magento_api_client.dart';
 
-await MagentoApiClient.init(
-  MagentoApiConfig(
-    baseUrl: 'https://your-magento-store.com',
-    authType: AuthType.guest,
-  ),
-);
-```
-
-#### Admin Token Authentication
-
-```dart
-await MagentoApiClient.init(
+final client = await MagentoApiClient.init(
   MagentoApiConfig(
     baseUrl: 'https://your-magento-store.com',
     authType: AuthType.adminToken,
@@ -58,262 +43,153 @@ await MagentoApiClient.init(
 );
 ```
 
-#### OAuth1 Authentication
+Need guest access only?
 
 ```dart
-await MagentoApiClient.init(
+final client = await MagentoApiClient.initGuest(
+  'https://your-magento-store.com',
+);
+```
+
+OAuth1 is also supported:
+
+```dart
+final client = await MagentoApiClient.init(
   MagentoApiConfig(
     baseUrl: 'https://your-magento-store.com',
     authType: AuthType.oauth1,
     oauthConsumerKey: 'your-consumer-key',
     oauthConsumerSecret: 'your-consumer-secret',
-    oauthToken: 'your-oauth-token', // Optional
-    oauthTokenSecret: 'your-oauth-token-secret', // Optional
+    oauthToken: 'your-oauth-token',
+    oauthTokenSecret: 'your-oauth-token-secret',
   ),
 );
 ```
 
-## Usage
+## Usage (All with `MagentoApiClient`)
 
-### Customer Service
-
-#### Login
+### Authentication
 
 ```dart
-final customerService = CustomerService();
+await client.login('customer@example.com', 'password123');
+print('Current customer: ${client.currentCustomer?.email}');
 
-try {
-  final token = await customerService.login('customer@example.com', 'password');
-  print('Login successful! Token: $token');
-} catch (e) {
-  print('Login failed: $e');
-}
-```
-
-#### Sign Up
-
-```dart
-try {
-  final customer = await customerService.signUp(
-    email: 'newcustomer@example.com',
-    password: 'securePassword123',
-    firstName: 'John',
-    lastName: 'Doe',
-  );
-  print('Sign up successful! Customer ID: ${customer.id}');
-} catch (e) {
-  print('Sign up failed: $e');
-}
-```
-
-#### Get Current Customer
-
-```dart
-final customer = await customerService.getCurrentCustomer();
-if (customer != null) {
-  print('Customer: ${customer.firstName} ${customer.lastName}');
-  print('Email: ${customer.email}');
-}
-```
-
-#### Logout
-
-```dart
-await customerService.logout();
-```
-
-### Product Service
-
-#### Get Products
-
-```dart
-final productService = ProductService();
-
-// Get all products with pagination
-final products = await productService.getProducts(
-  pageSize: 20,
-  currentPage: 1,
+await client.signUp(
+  email: 'newcustomer@example.com',
+  password: 'securePassword123',
+  firstName: 'John',
+  lastName: 'Doe',
 );
 
-// Get products with filters
-final filteredProducts = await productService.getProducts(
-  filters: {
-    'status': 1, // Only active products
-    'visibility': 4, // Visible in catalog and search
+await client.changePassword('oldPass', 'newPass');
+await client.logout();
+```
+
+### Products
+
+```dart
+final products = await client.getProducts(pageSize: 20, currentPage: 1);
+final filtered = await client.getProducts(filters: {'status': 1});
+final search = await client.searchProducts(searchTerm: 'laptop');
+final byCategory = await client.getProductsByCategoryId(categoryId: 5);
+final product = await client.getProductBySku('SKU-12345');
+```
+
+### Cart
+
+Guest flow:
+
+```dart
+final cartId = await client.createGuestCart();
+await client.addItemToGuestCart(sku: 'SKU-12345', qty: 2, cartId: cartId);
+final guestCart = await client.getGuestCart(cartId);
+```
+
+Logged-in flow (or auto-detect with current cart):
+
+```dart
+await client.addItemToCart(sku: 'SKU-12345', qty: 1);
+final cart = await client.getCurrentCart();
+await client.updateCustomerCartItem(itemId: 12, qty: 3);
+await client.removeCustomerCartItem(12);
+```
+
+### Orders
+
+```dart
+final myOrders = await client.getMyOrders(pageSize: 10);
+final order = await client.getOrderById(123);
+final allOrders = await client.getAllOrders(filters: {'status': 'processing'});
+```
+
+### Categories
+
+```dart
+final categories = await client.getCategories(pageSize: 50);
+final category = await client.getCategoryById(5);
+final tree = await client.getCategoryTree(rootCategoryId: 2, depth: 3);
+```
+
+### Checkout (Guest)
+
+```dart
+final countries = await client.getCountries();
+final shippingMethods = await client.estimateGuestShippingMethods(
+  cartId: 'guest_cart_id',
+  address: {
+    'country_id': 'US',
+    'postcode': '10001',
+    'city': 'New York',
+    'street': ['123 Main Street'],
+    'telephone': '123456789',
   },
-  pageSize: 10,
 );
 
-// Search products
-final searchResults = await productService.searchProducts(
-  searchTerm: 'laptop',
-  pageSize: 20,
+await client.setGuestShippingInformation(
+  cartId: 'guest_cart_id',
+  addressInformation: {
+    'shipping_address': {/* ... */},
+    'billing_address': {/* ... */},
+    'shipping_carrier_code': 'flatrate',
+    'shipping_method_code': 'flatrate',
+  },
 );
 
-// Get products by category
-final categoryProducts = await productService.getProductsByCategoryId(
-  categoryId: 5,
-  pageSize: 20,
-);
-```
-
-#### Get Product by SKU
-
-```dart
-final product = await productService.getProductBySku('SKU-12345');
-print('Product: ${product.name}');
-print('Price: \$${product.price}');
-```
-
-### Cart Service
-
-#### Guest Cart
-
-```dart
-final cartService = CartService();
-
-// Create guest cart
-final cartId = await cartService.createGuestCart();
-
-// Add item to cart
-final cartItem = await cartService.addItemToGuestCart(
-  sku: 'SKU-12345',
-  qty: 2,
-  cartId: cartId,
-);
-
-// Get cart
-final cart = await cartService.getGuestCart(cartId);
-print('Cart total: \$${cart.grandTotal}');
-print('Items: ${cart.itemsCount}');
-
-// Update item quantity
-await cartService.updateGuestCartItem(
-  itemId: cartItem.itemId!,
-  qty: 3,
-  cartId: cartId,
-);
-
-// Remove item
-await cartService.removeGuestCartItem(
-  itemId: cartItem.itemId!,
-  cartId: cartId,
+final paymentMethods = await client.getGuestPaymentMethods('guest_cart_id');
+final orderId = await client.placeGuestOrder(
+  cartId: 'guest_cart_id',
+  paymentMethod: {'method': 'checkmo'},
 );
 ```
 
-#### Customer Cart (After Login)
+## Example App
 
-```dart
-// Add item to customer cart
-final cartItem = await cartService.addItemToCustomerCart(
-  sku: 'SKU-12345',
-  qty: 1,
-);
+The `example/` directory contains a small Flutter app that demonstrates how to:
+- Initialize the client
+- Login a customer
+- Fetch products
+- Add an item to the cart
 
-// Get customer cart
-final cart = await cartService.getCustomerCart();
+To run the example:
 
-// Update item
-await cartService.updateCustomerCartItem(
-  itemId: cartItem.itemId!,
-  qty: 2,
-);
-
-// Remove item
-await cartService.removeCustomerCartItem(cartItem.itemId!);
-```
-
-#### Smart Cart Methods (Auto-detect Guest/Customer)
-
-```dart
-// Automatically uses guest or customer cart based on login status
-final cart = await cartService.getCurrentCart();
-final item = await cartService.addItemToCurrentCart(
-  sku: 'SKU-12345',
-  qty: 1,
-);
-```
-
-### Order Service
-
-#### Get My Orders
-
-```dart
-final orderService = OrderService();
-
-// Get customer orders
-final orders = await orderService.getMyOrders(
-  pageSize: 10,
-  currentPage: 1,
-);
-
-for (final order in orders) {
-  print('Order #${order.incrementId}');
-  print('Total: \$${order.grandTotal}');
-  print('Status: ${order.status}');
-}
-```
-
-#### Get Order by ID
-
-```dart
-final order = await orderService.getOrderById(123);
-print('Order details: ${order.items?.length} items');
-```
-
-### Category Service
-
-```dart
-final categoryService = CategoryService();
-
-// Get all categories
-final categories = await categoryService.getCategories(
-  pageSize: 50,
-);
-
-// Get category by ID
-final category = await categoryService.getCategoryById(5);
-print('Category: ${category.name}');
-
-// Get category tree
-final categoryTree = await categoryService.getCategoryTree(
-  rootCategoryId: 2,
-  depth: 3,
-);
+```bash
+cd example
+flutter run
 ```
 
 ## API Reference
 
-### MagentoApiClient
+`MagentoApiClient` exposes every Magento REST feature through intuitive methods.
 
-The main singleton client for making API requests.
+- **Initialization**: `init`, `initGuest`
+- **Authentication**: `login`, `signUp`, `changePassword`, `resetPassword`, `logout`, `isLoggedIn`, `currentCustomer`
+- **Products**: `getProducts`, `searchProducts`, `getProductBySku`, `getProductsByCategoryId`
+- **Cart**: All guest/customer helpers such as `createGuestCart`, `getCurrentCart`, `addItemToCart`, `addItemToGuestCart`, `updateCustomerCartItem`, etc.
+- **Orders**: `getMyOrders`, `getOrderById`, `getAllOrders`
+- **Categories**: `getCategories`, `getCategoryById`, `getCategoryTree`
+- **Checkout**: `getCountries`, `estimateGuestShippingMethods`, `setGuestShippingInformation`, `getGuestPaymentMethods`, `placeGuestOrder`
 
-#### Methods
-
-- `static Future<void> init(MagentoApiConfig config)` - Initialize the client
-- `Future<void> setCustomerToken(String token)` - Set customer token after login
-- `Future<void> clearCustomerToken()` - Clear customer token (logout)
-- `Future<String?> getCustomerToken()` - Get current customer token
-- `Future<dynamic> get(String endpoint, ...)` - Make GET request
-- `Future<dynamic> post(String endpoint, ...)` - Make POST request
-- `Future<dynamic> put(String endpoint, ...)` - Make PUT request
-- `Future<dynamic> delete(String endpoint, ...)` - Make DELETE request
-
-### Services
-
-- **CustomerService**: Customer authentication and management
-- **ProductService**: Product listing and search
-- **CartService**: Shopping cart operations
-- **OrderService**: Order management
-- **CategoryService**: Category operations
-
-### Models
-
-- **Customer**: Customer information and addresses
-- **Product**: Product details
-- **Cart**: Shopping cart with items
-- **Order**: Order information
-- **Category**: Category structure
+Models (`Customer`, `Product`, `Cart`, `Order`, `Category`) are returned by these methods so you can work with strongly typed data throughout your app.
 
 ## Error Handling
 

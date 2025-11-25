@@ -4,7 +4,7 @@ import '../models/category.dart';
 
 /// Service for category-related operations
 class CategoryService {
-  final MagentoApiClient _client = MagentoApiClient.instance;
+  final NetworkClient _client = NetworkClient.instance;
 
   /// Get all categories
   Future<List<Category>> getCategories({
