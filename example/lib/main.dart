@@ -32,9 +32,16 @@ class _MagentoExampleAppState extends State<MagentoExampleApp> {
     });
 
     try {
-      _client = await MagentoApiClient.initGuest(
+      // Initialize the singleton asynchronously. After this returns,
+      // you can obtain the singleton synchronously via the factory or
+      // `.instance` getter.
+      await MagentoApiClient.initGuest(
         'https://your-magento-domain.com',
       );
+
+      // Two equivalent ways to get the initialized singleton:
+      _client = MagentoApiClient(); // factory returning the singleton
+      // final syncClient = MagentoApiClient.instance;
 
       setState(() {
         _isInitialized = true;

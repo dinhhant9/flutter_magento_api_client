@@ -1,5 +1,5 @@
 /// Category model
-class Category {
+class MagentoCategory {
   final int? id;
   final int? parentId;
   final String? name;
@@ -8,11 +8,11 @@ class Category {
   final int? level;
   final String? path;
   final int? productCount;
-  final List<Category>? children;
+  final List<MagentoCategory>? children;
   final List<CategoryCustomAttribute>? customAttributes;
   final CategoryExtensionAttributes? extensionAttributes;
 
-  Category({
+  MagentoCategory({
     this.id,
     this.parentId,
     this.name,
@@ -26,8 +26,8 @@ class Category {
     this.extensionAttributes,
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
+  factory MagentoCategory.fromJson(Map<String, dynamic> json) {
+    return MagentoCategory(
       id: json['id'],
       parentId: json['parent_id'],
       name: json['name'],
@@ -38,7 +38,7 @@ class Category {
       productCount: json['product_count'],
       children: json['children_data'] != null
           ? (json['children_data'] as List)
-              .map((c) => Category.fromJson(c))
+              .map((c) => MagentoCategory.fromJson(c))
               .toList()
           : null,
       customAttributes: json['custom_attributes'] != null

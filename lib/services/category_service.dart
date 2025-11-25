@@ -7,7 +7,7 @@ class CategoryService {
   final NetworkClient _client = NetworkClient.instance;
 
   /// Get all categories
-  Future<List<Category>> getCategories({
+  Future<List<MagentoCategory>> getCategories({
     int? pageSize,
     int? currentPage,
   }) async {
@@ -28,7 +28,7 @@ class CategoryService {
 
     if (response is Map && response['items'] != null) {
       return (response['items'] as List)
-          .map((item) => Category.fromJson(item))
+          .map((item) => MagentoCategory.fromJson(item))
           .toList();
     }
 
@@ -36,17 +36,17 @@ class CategoryService {
   }
 
   /// Get category by ID
-  Future<Category> getCategoryById(int categoryId) async {
+  Future<MagentoCategory> getCategoryById(int categoryId) async {
     final response = await _client.get(
       ApiEndpoints.categoryById(categoryId),
       requiresAuth: false,
     );
 
-    return Category.fromJson(response);
+    return MagentoCategory.fromJson(response);
   }
 
   /// Get category tree (with children)
-  Future<Category> getCategoryTree({
+  Future<MagentoCategory> getCategoryTree({
     int? rootCategoryId,
     int? depth,
   }) async {
@@ -65,7 +65,7 @@ class CategoryService {
       requiresAuth: false,
     );
 
-    return Category.fromJson(response);
+    return MagentoCategory.fromJson(response);
   }
 }
 

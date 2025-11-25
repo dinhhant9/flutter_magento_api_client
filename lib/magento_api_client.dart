@@ -1,4 +1,4 @@
-// Magento API Client - A comprehensive Flutter package for connecting to Magento REST API
+// Magento API Client - A simple Flutter package for connecting to Magento REST API
 //
 // This package provides a complete solution for integrating Magento e-commerce
 // functionality into Flutter applications with support for OAuth1, Admin Token,

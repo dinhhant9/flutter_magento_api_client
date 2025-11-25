@@ -14,7 +14,29 @@ import '../services/product_service.dart';
 
 /// High-level facade that bundles every Magento service into a single class.
 class MagentoApiClient {
-  MagentoApiClient._();
+  // Private internal constructor used to create the single shared instance.
+  MagentoApiClient._internal();
+
+  // The single shared instance of MagentoApiClient.
+  static final MagentoApiClient _instance = MagentoApiClient._internal();
+
+  // Public synchronous accessor for the singleton instance.
+  /// Returns the initialized singleton instance.
+  ///
+  /// Throws a [StateError] if accessed before calling `MagentoApiClient.init(...)`.
+  static MagentoApiClient get instance {
+    if (!_instance._isInitialized) {
+      throw StateError(
+        'MagentoApiClient.instance called before init. Call MagentoApiClient.init(config) or MagentoApiClient.initGuest(baseUrl) first.',
+      );
+    }
+    return _instance;
+  }
+
+  /// Factory constructor that returns the singleton instance.
+  /// This provides a familiar API style: `var client = MagentoApiClient();`
+  /// It will rethrow the same [StateError] as `instance` if not initialized.
+  factory MagentoApiClient() => instance;
 
   bool _isInitialized = false;
 
@@ -33,12 +55,16 @@ class MagentoApiClient {
   Cart? get currentCart => _currentCart;
 
   /// Initialize the underlying network client and return a ready-to-use facade.
+  /// Initialize the underlying network client and return the singleton.
+  ///
+  /// Calling `init` multiple times is safe; initialization only runs once.
   static Future<MagentoApiClient> init(MagentoApiConfig config) async {
-    await NetworkClient.init(config);
-    final client = MagentoApiClient._();
-    client._isInitialized = true;
-    await client._loadSessionData();
-    return client;
+    if (!_instance._isInitialized) {
+      await NetworkClient.init(config);
+      _instance._isInitialized = true;
+      await _instance._loadSessionData();
+    }
+    return _instance;
   }
 
   /// Convenience helper for guest-only initialization.
@@ -354,7 +380,7 @@ class MagentoApiClient {
   // Category APIs
   // ---------------------------------------------------------------------------
 
-  Future<List<Category>> getCategories({int? pageSize, int? currentPage}) {
+  Future<List<MagentoCategory>> getCategories({int? pageSize, int? currentPage}) {
     _ensureInitialized();
     return _categoryService.getCategories(
       pageSize: pageSize,
@@ -362,12 +388,12 @@ class MagentoApiClient {
     );
   }
 
-  Future<Category> getCategoryById(int categoryId) {
+  Future<MagentoCategory> getCategoryById(int categoryId) {
     _ensureInitialized();
     return _categoryService.getCategoryById(categoryId);
   }
 
-  Future<Category> getCategoryTree({int? rootCategoryId, int? depth}) {
+  Future<MagentoCategory> getCategoryTree({int? rootCategoryId, int? depth}) {
     _ensureInitialized();
     return _categoryService.getCategoryTree(
       rootCategoryId: rootCategoryId,

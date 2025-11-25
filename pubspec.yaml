@@ -1,11 +1,11 @@
 name: magento_api_client
-description: A comprehensive Flutter package for connecting to Magento REST API with support for OAuth1, Admin Token, and Guest authentication.
+description: A simple Flutter package for connecting to Magento REST API with support for OAuth1, Admin Token, and Guest authentication.
 version: 0.0.1
 homepage: https://github.com/dinhhant9/flutter_magento_api_client
 repository: https://github.com/dinhhant9/flutter_magento_api_client
 
 environment:
-  sdk: ^3.10.1
+  sdk: ^3.8.0
   flutter: ">=1.17.0"
 
 dependencies:

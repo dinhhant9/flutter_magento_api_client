@@ -1,35 +1,34 @@
 # Magento API Client
 
-A comprehensive Flutter package for connecting to Magento REST API with support for OAuth1, Admin Token, and Guest authentication. This package provides all the necessary APIs for building e-commerce applications with Magento.
+A simple Flutter package for connecting to Magento REST API. This client supports OAuth1, Admin Token and Guest authentication, and exposes customer/product/cart/order/category/checkout APIs.
 
-## Features
+## Key features
 
-- ✅ **Multiple Authentication Methods**: Support for OAuth1, Admin Token, and Guest access
-- ✅ **Singleton Pattern**: Easy-to-use singleton client instance
-- ✅ **Automatic Token Management**: Package automatically manages user tokens and storage
-- ✅ **Complete E-commerce APIs**: Customer, Product, Cart, Order, and Category services
-- ✅ **Type-Safe Models**: Full Dart models for all Magento entities
-- ✅ **Error Handling**: Comprehensive error handling with custom exceptions
-- ✅ **Storage Management**: Built-in storage for tokens and cart IDs
+- Multiple authentication methods: OAuth1, Admin Token, Guest
+- Singleton client with a friendly API (factory + synchronous `instance` getter)
+- Automatic token and session storage handling
+- Full set of Magento APIs: customers, products, carts, orders, categories, checkout
 
 ## Installation
 
-Add this to your package's `pubspec.yaml` file:
+Add to your package's `pubspec.yaml`:
 
 ```yaml
 dependencies:
   magento_api_client: ^0.0.1
 ```
 
-Then run:
+Run:
 
 ```bash
 flutter pub get
 ```
 
-## Getting Started
+## Getting started
 
-Create a single `MagentoApiClient` instance and keep it for the lifetime of your app.
+This library provides a single shared `MagentoApiClient` instance for your app. Initialize the client once (async), then access it synchronously anywhere in your code.
+
+Example async initialization (recommended):
 
 ```dart
 import 'package:magento_api_client/magento_api_client.dart';
@@ -38,37 +37,30 @@ final client = await MagentoApiClient.init(
   MagentoApiConfig(
     baseUrl: 'https://your-magento-store.com',
     authType: AuthType.adminToken,
-    adminToken: 'your-admin-token-here',
+    adminToken: 'your-admin-token',
   ),
 );
 ```
 
-Need guest access only?
+Guest-only init helper:
 
 ```dart
-final client = await MagentoApiClient.initGuest(
-  'https://your-magento-store.com',
-);
+final client = await MagentoApiClient.initGuest('https://your-magento-store.com');
 ```
 
-OAuth1 is also supported:
+Synchronous access after initialization
 
 ```dart
-final client = await MagentoApiClient.init(
-  MagentoApiConfig(
-    baseUrl: 'https://your-magento-store.com',
-    authType: AuthType.oauth1,
-    oauthConsumerKey: 'your-consumer-key',
-    oauthConsumerSecret: 'your-consumer-secret',
-    oauthToken: 'your-oauth-token',
-    oauthTokenSecret: 'your-oauth-token-secret',
-  ),
-);
+// Two equivalent ways to get the initialized singleton
+final client1 = MagentoApiClient.instance; // throws StateError if init not called
+final client2 = MagentoApiClient(); // factory that returns the singleton
 ```
 
-## Usage (All with `MagentoApiClient`)
+Important: calling `MagentoApiClient.instance` or `MagentoApiClient()` before any call to `init(...)` will throw a `StateError`. Always call `await MagentoApiClient.init(...)` (or `initGuest`) during app startup before using synchronous access.
 
-### Authentication
+## Usage highlights
+
+Authentication
 
 ```dart
 await client.login('customer@example.com', 'password123');
@@ -85,151 +77,62 @@ await client.changePassword('oldPass', 'newPass');
 await client.logout();
 ```
 
-### Products
+Products
 
 ```dart
-final products = await client.getProducts(pageSize: 20, currentPage: 1);
-final filtered = await client.getProducts(filters: {'status': 1});
-final search = await client.searchProducts(searchTerm: 'laptop');
-final byCategory = await client.getProductsByCategoryId(categoryId: 5);
+final products = await client.getProducts(pageSize: 20);
 final product = await client.getProductBySku('SKU-12345');
 ```
 
-### Cart
-
-Guest flow:
+Cart
 
 ```dart
 final cartId = await client.createGuestCart();
 await client.addItemToGuestCart(sku: 'SKU-12345', qty: 2, cartId: cartId);
-final guestCart = await client.getGuestCart(cartId);
-```
-
-Logged-in flow (or auto-detect with current cart):
-
-```dart
-await client.addItemToCart(sku: 'SKU-12345', qty: 1);
 final cart = await client.getCurrentCart();
-await client.updateCustomerCartItem(itemId: 12, qty: 3);
-await client.removeCustomerCartItem(12);
 ```
 
-### Orders
+Orders, categories and checkout APIs follow the same pattern (see API Reference below).
 
-```dart
-final myOrders = await client.getMyOrders(pageSize: 10);
-final order = await client.getOrderById(123);
-final allOrders = await client.getAllOrders(filters: {'status': 'processing'});
-```
+## Example app
 
-### Categories
-
-```dart
-final categories = await client.getCategories(pageSize: 50);
-final category = await client.getCategoryById(5);
-final tree = await client.getCategoryTree(rootCategoryId: 2, depth: 3);
-```
-
-### Checkout (Guest)
-
-```dart
-final countries = await client.getCountries();
-final shippingMethods = await client.estimateGuestShippingMethods(
-  cartId: 'guest_cart_id',
-  address: {
-    'country_id': 'US',
-    'postcode': '10001',
-    'city': 'New York',
-    'street': ['123 Main Street'],
-    'telephone': '123456789',
-  },
-);
-
-await client.setGuestShippingInformation(
-  cartId: 'guest_cart_id',
-  addressInformation: {
-    'shipping_address': {/* ... */},
-    'billing_address': {/* ... */},
-    'shipping_carrier_code': 'flatrate',
-    'shipping_method_code': 'flatrate',
-  },
-);
-
-final paymentMethods = await client.getGuestPaymentMethods('guest_cart_id');
-final orderId = await client.placeGuestOrder(
-  cartId: 'guest_cart_id',
-  paymentMethod: {'method': 'checkmo'},
-);
-```
-
-## Example App
-
-The `example/` directory contains a small Flutter app that demonstrates how to:
-- Initialize the client
-- Login a customer
-- Fetch products
-- Add an item to the cart
-
-To run the example:
+See the `example/` directory for a small Flutter app demonstrating initialization and basic usage. Run it with:
 
 ```bash
 cd example
 flutter run
 ```
 
-## API Reference
+## API Reference (selected)
 
-`MagentoApiClient` exposes every Magento REST feature through intuitive methods.
+- Initialization: `init`, `initGuest`
+- Synchronous access: `MagentoApiClient.instance` (throws if not initialized), `MagentoApiClient()` factory
+- Authentication: `login`, `signUp`, `changePassword`, `resetPassword`, `logout`, `isLoggedIn`, `currentCustomer`
+- Products: `getProducts`, `searchProducts`, `getProductBySku`, `getProductsByCategoryId`
+- Cart: `createGuestCart`, `getGuestCart`, `getCurrentCart`, `addItemToCart`, `addItemToGuestCart`, `updateCustomerCartItem`, `removeCustomerCartItem`
 
-- **Initialization**: `init`, `initGuest`
-- **Authentication**: `login`, `signUp`, `changePassword`, `resetPassword`, `logout`, `isLoggedIn`, `currentCustomer`
-- **Products**: `getProducts`, `searchProducts`, `getProductBySku`, `getProductsByCategoryId`
-- **Cart**: All guest/customer helpers such as `createGuestCart`, `getCurrentCart`, `addItemToCart`, `addItemToGuestCart`, `updateCustomerCartItem`, etc.
-- **Orders**: `getMyOrders`, `getOrderById`, `getAllOrders`
-- **Categories**: `getCategories`, `getCategoryById`, `getCategoryTree`
-- **Checkout**: `getCountries`, `estimateGuestShippingMethods`, `setGuestShippingInformation`, `getGuestPaymentMethods`, `placeGuestOrder`
+For full API, consult the Dart docs or the source in `lib/`.
 
-Models (`Customer`, `Product`, `Cart`, `Order`, `Category`) are returned by these methods so you can work with strongly typed data throughout your app.
+## Error handling
 
-## Error Handling
-
-The package uses custom exceptions for better error handling:
+The package surfaces `ApiException` for API errors. Example:
 
 ```dart
-import 'package:magento_api_client/magento_api_client.dart';
-
 try {
-  await customerService.login('email@example.com', 'password');
+  await client.login('email@example.com', 'password');
 } on ApiException catch (e) {
-  print('API Error: ${e.message}');
-  print('Status Code: ${e.statusCode}');
+  print('API error: ${e.message}');
 } catch (e) {
-  print('Unexpected error: $e');
+  print('Unexpected: $e');
 }
 ```
 
-## Storage
-
-The package automatically manages storage for:
-- User tokens
-- Customer IDs
-- Customer emails
-- Cart IDs (both guest and customer)
-
-All storage is handled internally using `shared_preferences`. You don't need to manually manage tokens - the package handles everything automatically.
+Also note: accessing `MagentoApiClient.instance` or `MagentoApiClient()` before calling `init(...)` will throw `StateError` with guidance to call `init` first.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome. Open a PR or issue on GitHub.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/dinhhant9/flutter_magento_api_client).
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes.
+MIT. See LICENSE.
