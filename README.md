@@ -352,7 +352,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/yourusername/magento_api_client).
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/dinhhant9/flutter_magento_api_client).
 
 ## Changelog
 
