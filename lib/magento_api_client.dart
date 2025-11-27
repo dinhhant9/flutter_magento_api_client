@@ -14,6 +14,8 @@ export 'models/product.dart';
 export 'models/cart.dart';
 export 'models/order.dart';
 export 'models/category.dart';
+export 'models/country.dart';
+export 'models/checkout.dart';
 
 // Core
 export 'core/magento_api_client.dart';

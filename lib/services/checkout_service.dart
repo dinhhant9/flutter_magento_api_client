@@ -1,3 +1,6 @@
+import 'package:magento_api_client/models/checkout.dart';
+import 'package:magento_api_client/models/country.dart';
+
 import '../api/api_client.dart';
 import '../constants/api_endpoints.dart';
 
@@ -8,14 +11,15 @@ class CheckoutService {
   final NetworkClient _client = NetworkClient.instance;
 
   /// Fetch a list of supported countries.
-  Future<List<dynamic>> getCountries() async {
+  Future<List<MagentoCountryItem>> getCountries() async {
     final response = await _client.get(
       ApiEndpoints.countries,
       requiresAuth: false,
     );
-
     if (response is List) {
-      return response;
+      return response
+          .map((x) => MagentoCountryItem.fromJson(x as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
@@ -32,7 +36,7 @@ class CheckoutService {
   ///   "street": ["123 Main St"],
   ///   "telephone": "1234567890"
   /// }
-  Future<List<dynamic>> estimateGuestShippingMethods({
+  Future<List<MagentoShippingMethod>> estimateGuestShippingMethods({
     required String cartId,
     required Map<String, dynamic> address,
   }) async {
@@ -41,9 +45,10 @@ class CheckoutService {
       body: {'address': address},
       requiresAuth: false,
     );
-
     if (response is List) {
-      return response;
+      return response
+          .map((x) => MagentoShippingMethod.fromJson(x as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
@@ -54,11 +59,11 @@ class CheckoutService {
   /// `billing_address`, `shipping_carrier_code`, and `shipping_method_code`.
   Future<Map<String, dynamic>> setGuestShippingInformation({
     required String cartId,
-    required Map<String, dynamic> addressInformation,
+    required MagentoShippingInformationInput addressInformation,
   }) async {
     final response = await _client.post(
       ApiEndpoints.guestCartShippingInformation(cartId),
-      body: {'addressInformation': addressInformation},
+      body: addressInformation.toJson(),
       requiresAuth: false,
     );
 
@@ -69,14 +74,18 @@ class CheckoutService {
   }
 
   /// Get payment methods available for a guest cart.
-  Future<List<dynamic>> getGuestPaymentMethods(String cartId) async {
+  Future<List<MagentoPaymentMethod>> getGuestPaymentMethods(
+    String cartId,
+  ) async {
     final response = await _client.get(
       ApiEndpoints.guestCartPaymentMethods(cartId),
       requiresAuth: false,
     );
 
     if (response is List) {
-      return response;
+      return response
+          .map((x) => MagentoPaymentMethod.fromJson(x as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
@@ -88,17 +97,11 @@ class CheckoutService {
   /// different from the shipping address submitted earlier.
   Future<String> placeGuestOrder({
     required String cartId,
-    required Map<String, dynamic> paymentMethod,
-    Map<String, dynamic>? billingAddress,
+    required MagentoPaymentInformationInput paymentInfo,
   }) async {
-    final body = {
-      'paymentMethod': paymentMethod,
-      if (billingAddress != null) 'billing_address': billingAddress,
-    };
-
     final response = await _client.post(
       ApiEndpoints.guestCartPaymentInformation(cartId),
-      body: body,
+      body: paymentInfo.toJson(),
       requiresAuth: false,
     );
 

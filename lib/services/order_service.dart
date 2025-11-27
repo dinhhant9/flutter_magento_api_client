@@ -7,7 +7,7 @@ class OrderService {
   final NetworkClient _client = NetworkClient.instance;
 
   /// Get orders for current customer
-  Future<List<Order>> getMyOrders({
+  Future<List<MagentoOrder>> getMyOrders({
     int? pageSize,
     int? currentPage,
   }) async {
@@ -27,7 +27,7 @@ class OrderService {
 
     if (response is Map && response['items'] != null) {
       return (response['items'] as List)
-          .map((item) => Order.fromJson(item))
+          .map((item) => MagentoOrder.fromJson(item))
           .toList();
     }
 
@@ -35,13 +35,13 @@ class OrderService {
   }
 
   /// Get order by ID
-  Future<Order> getOrderById(int orderId) async {
+  Future<MagentoOrder> getOrderById(int orderId) async {
     final response = await _client.get(ApiEndpoints.orderById(orderId));
-    return Order.fromJson(response);
+    return MagentoOrder.fromJson(response);
   }
 
   /// Get all orders (requires admin access)
-  Future<List<Order>> getAllOrders({
+  Future<List<MagentoOrder>> getAllOrders({
     int? pageSize,
     int? currentPage,
     Map<String, dynamic>? filters,
@@ -73,7 +73,7 @@ class OrderService {
 
     if (response is Map && response['items'] != null) {
       return (response['items'] as List)
-          .map((item) => Order.fromJson(item))
+          .map((item) => MagentoOrder.fromJson(item))
           .toList();
     }
 

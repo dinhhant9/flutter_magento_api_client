@@ -7,7 +7,7 @@ class CategoryService {
   final NetworkClient _client = NetworkClient.instance;
 
   /// Get all categories
-  Future<List<MagentoCategory>> getCategories({
+  Future<MagentoCategory> getCategories({
     int? pageSize,
     int? currentPage,
   }) async {
@@ -26,13 +26,7 @@ class CategoryService {
       requiresAuth: false,
     );
 
-    if (response is Map && response['items'] != null) {
-      return (response['items'] as List)
-          .map((item) => MagentoCategory.fromJson(item))
-          .toList();
-    }
-
-    return [];
+    return MagentoCategory.fromJson(response);
   }
 
   /// Get category by ID

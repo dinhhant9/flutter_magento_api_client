@@ -1,3 +1,6 @@
+import 'package:magento_api_client/models/checkout.dart';
+import 'package:magento_api_client/models/country.dart';
+
 import '../api/api_client.dart';
 import '../api/auth_type.dart';
 import '../models/cart.dart';
@@ -47,12 +50,12 @@ class MagentoApiClient {
   final CategoryService _categoryService = CategoryService();
   final CheckoutService _checkoutService = CheckoutService();
 
-  Customer? _currentCustomer;
-  Cart? _currentCart;
+  MagentoCustomer? _currentCustomer;
+  MagentoCart? _currentCart;
 
   bool get isInitialized => _isInitialized;
-  Customer? get currentCustomer => _currentCustomer;
-  Cart? get currentCart => _currentCart;
+  MagentoCustomer? get currentCustomer => _currentCustomer;
+  MagentoCart? get currentCart => _currentCart;
 
   /// Initialize the underlying network client and return a ready-to-use facade.
   /// Initialize the underlying network client and return the singleton.
@@ -69,9 +72,7 @@ class MagentoApiClient {
 
   /// Convenience helper for guest-only initialization.
   static Future<MagentoApiClient> initGuest(String baseUrl) {
-    return init(
-      MagentoApiConfig(baseUrl: baseUrl, authType: AuthType.guest),
-    );
+    return init(MagentoApiConfig(baseUrl: baseUrl, authType: AuthType.guest));
   }
 
   void _ensureInitialized() {
@@ -107,7 +108,7 @@ class MagentoApiClient {
     return token;
   }
 
-  Future<Customer> signUp({
+  Future<MagentoCustomer> signUp({
     required String email,
     required String password,
     required String firstName,
@@ -130,19 +131,19 @@ class MagentoApiClient {
     return customer;
   }
 
-  Future<Customer?> fetchCurrentCustomer() async {
+  Future<MagentoCustomer?> fetchCurrentCustomer() async {
     _ensureInitialized();
     final customer = await _customerService.getCurrentCustomer();
     _currentCustomer = customer;
     return customer;
   }
 
-  Future<Customer> getCustomerById(int customerId) async {
+  Future<MagentoCustomer> getCustomerById(int customerId) async {
     _ensureInitialized();
     return _customerService.getCustomerById(customerId);
   }
 
-  Future<Customer> updateCustomer(Customer customer) async {
+  Future<MagentoCustomer> updateCustomer(MagentoCustomer customer) async {
     _ensureInitialized();
     final updated = await _customerService.updateCustomer(customer);
     _currentCustomer = updated;
@@ -175,7 +176,7 @@ class MagentoApiClient {
   // Product APIs
   // ---------------------------------------------------------------------------
 
-  Future<List<Product>> getProducts({
+  Future<MagentoProductResult> getProducts({
     int? pageSize,
     int? currentPage,
     Map<String, dynamic>? filters,
@@ -192,28 +193,17 @@ class MagentoApiClient {
     );
   }
 
-  Future<List<Product>> fetchProducts({
-    int? pageSize,
-    int? currentPage,
-    Map<String, dynamic>? filters,
-    String? sortField,
-    String? sortOrder,
-  }) {
-    return getProducts(
-      pageSize: pageSize,
-      currentPage: currentPage,
-      filters: filters,
-      sortField: sortField,
-      sortOrder: sortOrder,
-    );
-  }
-
-  Future<Product> getProductBySku(String sku) {
+  Future<MagentoProduct> getProductBySku(String sku) {
     _ensureInitialized();
     return _productService.getProductBySku(sku);
   }
 
-  Future<List<Product>> searchProducts({
+  Future<List<MagentoProduct>> getProductsBySkus(List<String> skus) {
+    _ensureInitialized();
+    return _productService.getProductsBySkus(skus);
+  }
+
+  Future<List<MagentoProduct>> searchProducts({
     required String searchTerm,
     int? pageSize,
     int? currentPage,
@@ -226,7 +216,7 @@ class MagentoApiClient {
     );
   }
 
-  Future<List<Product>> getProductsByCategoryId({
+  Future<List<MagentoProduct>> getProductsByCategoryId({
     required int categoryId,
     int? pageSize,
     int? currentPage,
@@ -248,27 +238,23 @@ class MagentoApiClient {
     return _cartService.createGuestCart();
   }
 
-  Future<Cart> getGuestCart([String? cartId]) {
+  Future<MagentoCart> getGuestCart([String? cartId]) {
     _ensureInitialized();
     return _cartService.getGuestCart(cartId);
   }
 
-  Future<CartItem> addItemToGuestCart({
+  Future<MagentoCartItem> addItemToGuestCart({
     required String sku,
-    required double qty,
+    required int qty,
     String? cartId,
   }) {
     _ensureInitialized();
-    return _cartService.addItemToGuestCart(
-      sku: sku,
-      qty: qty,
-      cartId: cartId,
-    );
+    return _cartService.addItemToGuestCart(sku: sku, qty: qty, cartId: cartId);
   }
 
-  Future<CartItem> updateGuestCartItem({
+  Future<MagentoCartItem> updateGuestCartItem({
     required int itemId,
-    required double qty,
+    required int qty,
     String? cartId,
   }) {
     _ensureInitialized();
@@ -279,37 +265,34 @@ class MagentoApiClient {
     );
   }
 
-  Future<bool> removeGuestCartItem({
-    required int itemId,
-    String? cartId,
-  }) {
+  Future<bool> removeGuestCartItem({required int itemId, String? cartId}) {
     _ensureInitialized();
     return _cartService.removeGuestCartItem(itemId: itemId, cartId: cartId);
   }
 
-  Future<Cart> getCustomerCart() async {
+  Future<MagentoCart> getCustomerCart() async {
     _ensureInitialized();
     final cart = await _cartService.getCustomerCart();
     _currentCart = cart;
     return cart;
   }
 
-  Future<Cart> createCustomerCart() {
+  Future<MagentoCart> createCustomerCart() {
     _ensureInitialized();
     return _cartService.createCustomerCart();
   }
 
-  Future<CartItem> addItemToCustomerCart({
+  Future<MagentoCartItem> addItemToCustomerCart({
     required String sku,
-    required double qty,
+    required int qty,
   }) {
     _ensureInitialized();
     return _cartService.addItemToCustomerCart(sku: sku, qty: qty);
   }
 
-  Future<CartItem> updateCustomerCartItem({
+  Future<MagentoCartItem> updateCustomerCartItem({
     required int itemId,
-    required double qty,
+    required int qty,
   }) {
     _ensureInitialized();
     return _cartService.updateCustomerCartItem(itemId: itemId, qty: qty);
@@ -320,16 +303,16 @@ class MagentoApiClient {
     return _cartService.removeCustomerCartItem(itemId);
   }
 
-  Future<Cart> getCurrentCart() async {
+  Future<MagentoCart> getCurrentCart() async {
     _ensureInitialized();
     final cart = await _cartService.getCurrentCart();
     _currentCart = cart;
     return cart;
   }
 
-  Future<CartItem> addItemToCurrentCart({
+  Future<MagentoCartItem> addItemToCurrentCart({
     required String sku,
-    required double qty,
+    required int qty,
   }) async {
     _ensureInitialized();
     final item = await _cartService.addItemToCurrentCart(sku: sku, qty: qty);
@@ -339,9 +322,9 @@ class MagentoApiClient {
     return item;
   }
 
-  Future<CartItem> addItemToCart({
+  Future<MagentoCartItem> addItemToCart({
     required String sku,
-    required double qty,
+    required int qty,
   }) {
     return addItemToCurrentCart(sku: sku, qty: qty);
   }
@@ -350,7 +333,7 @@ class MagentoApiClient {
   // Order APIs
   // ---------------------------------------------------------------------------
 
-  Future<List<Order>> getMyOrders({int? pageSize, int? currentPage}) {
+  Future<List<MagentoOrder>> getMyOrders({int? pageSize, int? currentPage}) {
     _ensureInitialized();
     return _orderService.getMyOrders(
       pageSize: pageSize,
@@ -358,12 +341,12 @@ class MagentoApiClient {
     );
   }
 
-  Future<Order> getOrderById(int orderId) {
+  Future<MagentoOrder> getOrderById(int orderId) {
     _ensureInitialized();
     return _orderService.getOrderById(orderId);
   }
 
-  Future<List<Order>> getAllOrders({
+  Future<List<MagentoOrder>> getAllOrders({
     int? pageSize,
     int? currentPage,
     Map<String, dynamic>? filters,
@@ -380,7 +363,10 @@ class MagentoApiClient {
   // Category APIs
   // ---------------------------------------------------------------------------
 
-  Future<List<MagentoCategory>> getCategories({int? pageSize, int? currentPage}) {
+  Future<MagentoCategory> getCategories({
+    int? pageSize,
+    int? currentPage,
+  }) {
     _ensureInitialized();
     return _categoryService.getCategories(
       pageSize: pageSize,
@@ -405,12 +391,12 @@ class MagentoApiClient {
   // Checkout APIs
   // ---------------------------------------------------------------------------
 
-  Future<List<dynamic>> getCountries() {
+  Future<List<MagentoCountryItem>> getCountries() {
     _ensureInitialized();
     return _checkoutService.getCountries();
   }
 
-  Future<List<dynamic>> estimateGuestShippingMethods({
+  Future<List<MagentoShippingMethod>> estimateGuestShippingMethods({
     required String cartId,
     required Map<String, dynamic> address,
   }) {
@@ -423,7 +409,7 @@ class MagentoApiClient {
 
   Future<Map<String, dynamic>> setGuestShippingInformation({
     required String cartId,
-    required Map<String, dynamic> addressInformation,
+    required MagentoShippingInformationInput addressInformation,
   }) {
     _ensureInitialized();
     return _checkoutService.setGuestShippingInformation(
@@ -432,23 +418,19 @@ class MagentoApiClient {
     );
   }
 
-  Future<List<dynamic>> getGuestPaymentMethods(String cartId) {
+  Future<List<MagentoPaymentMethod>> getGuestPaymentMethods(String cartId) {
     _ensureInitialized();
     return _checkoutService.getGuestPaymentMethods(cartId);
   }
 
   Future<String> placeGuestOrder({
     required String cartId,
-    required Map<String, dynamic> paymentMethod,
-    Map<String, dynamic>? billingAddress,
+    required MagentoPaymentInformationInput paymentInfo,
   }) {
     _ensureInitialized();
     return _checkoutService.placeGuestOrder(
       cartId: cartId,
-      paymentMethod: paymentMethod,
-      billingAddress: billingAddress,
+      paymentInfo: paymentInfo,
     );
   }
 }
-
-

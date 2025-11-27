@@ -81,12 +81,12 @@ class _MagentoExampleAppState extends State<MagentoExampleApp> {
     try {
       final products = await _client!.getProducts(pageSize: 5);
       setState(() {
-        if (products.isEmpty) {
+        if (products.items.isEmpty) {
           _status = 'No products found.';
         } else {
           _status =
-              'Fetched ${products.length} products. '
-              'First product: ${products.first.name}';
+              'Fetched ${products.totalCount} products. '
+              'First product: ${products.items.first.name}';
         }
       });
     } catch (e) {

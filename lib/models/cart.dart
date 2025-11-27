@@ -1,23 +1,23 @@
 /// Cart model
-class Cart {
+class MagentoCart {
   final int? id;
   final String? createdAt;
   final String? updatedAt;
   final bool? isActive;
   final bool? isVirtual;
-  final List<CartItem>? items;
+  final List<MagentoCartItem>? items;
   final int? itemsCount;
   final int? itemsQty;
-  final CartCustomer? customer;
-  final CartBillingAddress? billingAddress;
+  final MagentoCartCustomer? customer;
+  final MagentoCartBillingAddress? billingAddress;
   final int? reservedOrderId;
   final double? subtotal;
   final double? subtotalWithDiscount;
   final double? grandTotal;
-  final List<TotalSegment>? totalSegments;
-  final CartExtensionAttributes? extensionAttributes;
+  final List<MagentoTotalSegment>? totalSegments;
+  final MagentoCartExtensionAttributes? extensionAttributes;
 
-  Cart({
+  MagentoCart({
     this.id,
     this.createdAt,
     this.updatedAt,
@@ -36,23 +36,23 @@ class Cart {
     this.extensionAttributes,
   });
 
-  factory Cart.fromJson(Map<String, dynamic> json) {
-    return Cart(
+  factory MagentoCart.fromJson(Map<String, dynamic> json) {
+    return MagentoCart(
       id: json['id'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       isActive: json['is_active'],
       isVirtual: json['is_virtual'],
       items: json['items'] != null
-          ? (json['items'] as List).map((i) => CartItem.fromJson(i)).toList()
+          ? (json['items'] as List).map((i) => MagentoCartItem.fromJson(i)).toList()
           : null,
       itemsCount: json['items_count'],
       itemsQty: json['items_qty'],
       customer: json['customer'] != null
-          ? CartCustomer.fromJson(json['customer'])
+          ? MagentoCartCustomer.fromJson(json['customer'])
           : null,
       billingAddress: json['billing_address'] != null
-          ? CartBillingAddress.fromJson(json['billing_address'])
+          ? MagentoCartBillingAddress.fromJson(json['billing_address'])
           : null,
       reservedOrderId: json['reserved_order_id'],
       subtotal: json['subtotal'] != null
@@ -66,11 +66,11 @@ class Cart {
           : null,
       totalSegments: json['total_segments'] != null
           ? (json['total_segments'] as List)
-              .map((t) => TotalSegment.fromJson(t))
+              .map((t) => MagentoTotalSegment.fromJson(t))
               .toList()
           : null,
       extensionAttributes: json['extension_attributes'] != null
-          ? CartExtensionAttributes.fromJson(json['extension_attributes'])
+          ? MagentoCartExtensionAttributes.fromJson(json['extension_attributes'])
           : null,
     );
   }
@@ -100,17 +100,17 @@ class Cart {
 }
 
 /// Cart item model
-class CartItem {
+class MagentoCartItem {
   final int? itemId;
   final String? sku;
-  final double? qty;
+  final int? qty;
   final String? name;
   final double? price;
   final String? productType;
-  final CartProduct? productOption;
-  final CartExtensionAttributes? extensionAttributes;
+  final MagentoCartProduct? productOption;
+  final MagentoCartExtensionAttributes? extensionAttributes;
 
-  CartItem({
+  MagentoCartItem({
     this.itemId,
     this.sku,
     this.qty,
@@ -121,21 +121,21 @@ class CartItem {
     this.extensionAttributes,
   });
 
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
+  factory MagentoCartItem.fromJson(Map<String, dynamic> json) {
+    return MagentoCartItem(
       itemId: json['item_id'],
       sku: json['sku'],
-      qty: json['qty'] != null ? double.tryParse(json['qty'].toString()) : null,
+      qty: json['qty'] != null ? int.tryParse(json['qty'].toString()) : null,
       name: json['name'],
       price: json['price'] != null
           ? double.tryParse(json['price'].toString())
           : null,
       productType: json['product_type'],
       productOption: json['product_option'] != null
-          ? CartProduct.fromJson(json['product_option'])
+          ? MagentoCartProduct.fromJson(json['product_option'])
           : null,
       extensionAttributes: json['extension_attributes'] != null
-          ? CartExtensionAttributes.fromJson(json['extension_attributes'])
+          ? MagentoCartExtensionAttributes.fromJson(json['extension_attributes'])
           : null,
     );
   }
@@ -154,7 +154,7 @@ class CartItem {
 }
 
 /// Billing address for cart
-class CartBillingAddress {
+class MagentoCartBillingAddress {
   final int? id;
   final String? region;
   final String? regionId;
@@ -168,7 +168,7 @@ class CartBillingAddress {
   final String? lastName;
   final String? email;
 
-  CartBillingAddress({
+  MagentoCartBillingAddress({
     this.id,
     this.region,
     this.regionId,
@@ -183,8 +183,8 @@ class CartBillingAddress {
     this.email,
   });
 
-  factory CartBillingAddress.fromJson(Map<String, dynamic> json) {
-    return CartBillingAddress(
+  factory MagentoCartBillingAddress.fromJson(Map<String, dynamic> json) {
+    return MagentoCartBillingAddress(
       id: json['id'],
       region: json['region'],
       regionId: json['region_id']?.toString(),
@@ -221,14 +221,14 @@ class CartBillingAddress {
 }
 
 /// Total segment model
-class TotalSegment {
+class MagentoTotalSegment {
   final String? code;
   final String? title;
   final double? value;
   final String? area;
-  final CartExtensionAttributes? extensionAttributes;
+  final MagentoCartExtensionAttributes? extensionAttributes;
 
-  TotalSegment({
+  MagentoTotalSegment({
     this.code,
     this.title,
     this.value,
@@ -236,8 +236,8 @@ class TotalSegment {
     this.extensionAttributes,
   });
 
-  factory TotalSegment.fromJson(Map<String, dynamic> json) {
-    return TotalSegment(
+  factory MagentoTotalSegment.fromJson(Map<String, dynamic> json) {
+    return MagentoTotalSegment(
       code: json['code'],
       title: json['title'],
       value: json['value'] != null
@@ -245,7 +245,7 @@ class TotalSegment {
           : null,
       area: json['area'],
       extensionAttributes: json['extension_attributes'] != null
-          ? CartExtensionAttributes.fromJson(json['extension_attributes'])
+          ? MagentoCartExtensionAttributes.fromJson(json['extension_attributes'])
           : null,
     );
   }
@@ -261,15 +261,15 @@ class TotalSegment {
 }
 
 /// Extension attributes for cart
-class CartExtensionAttributes {
+class MagentoCartExtensionAttributes {
   final Map<String, dynamic>? additionalAttributes;
 
-  CartExtensionAttributes({
+  MagentoCartExtensionAttributes({
     this.additionalAttributes,
   });
 
-  factory CartExtensionAttributes.fromJson(Map<String, dynamic> json) {
-    return CartExtensionAttributes(
+  factory MagentoCartExtensionAttributes.fromJson(Map<String, dynamic> json) {
+    return MagentoCartExtensionAttributes(
       additionalAttributes: json,
     );
   }
@@ -280,21 +280,21 @@ class CartExtensionAttributes {
 }
 
 /// Customer model (simplified for cart)
-class CartCustomer {
+class MagentoCartCustomer {
   final int? id;
   final String? email;
   final String? firstName;
   final String? lastName;
 
-  CartCustomer({
+  MagentoCartCustomer({
     this.id,
     this.email,
     this.firstName,
     this.lastName,
   });
 
-  factory CartCustomer.fromJson(Map<String, dynamic> json) {
-    return CartCustomer(
+  factory MagentoCartCustomer.fromJson(Map<String, dynamic> json) {
+    return MagentoCartCustomer(
       id: json['id'],
       email: json['email'],
       firstName: json['firstname'],
@@ -313,17 +313,17 @@ class CartCustomer {
 }
 
 /// Product model (simplified for cart)
-class CartProduct {
+class MagentoCartProduct {
   final String? sku;
   final String? name;
 
-  CartProduct({
+  MagentoCartProduct({
     this.sku,
     this.name,
   });
 
-  factory CartProduct.fromJson(Map<String, dynamic> json) {
-    return CartProduct(
+  factory MagentoCartProduct.fromJson(Map<String, dynamic> json) {
+    return MagentoCartProduct(
       sku: json['sku'],
       name: json['name'],
     );

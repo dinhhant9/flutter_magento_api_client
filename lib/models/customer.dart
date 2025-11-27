@@ -1,5 +1,5 @@
 /// Customer model
-class Customer {
+class MagentoCustomer {
   final int? id;
   final String? email;
   final String? firstName;
@@ -11,12 +11,12 @@ class Customer {
   final String? dateOfBirth;
   final String? taxvat;
   final bool? isSubscribed;
-  final List<Address>? addresses;
+  final List<MagentoAddress>? addresses;
   final int? defaultBilling;
   final int? defaultShipping;
-  final CustomerExtensionAttributes? extensionAttributes;
+  final MagentoCustomerExtensionAttributes? extensionAttributes;
 
-  Customer({
+  MagentoCustomer({
     this.id,
     this.email,
     this.firstName,
@@ -34,8 +34,8 @@ class Customer {
     this.extensionAttributes,
   });
 
-  factory Customer.fromJson(Map<String, dynamic> json) {
-    return Customer(
+  factory MagentoCustomer.fromJson(Map<String, dynamic> json) {
+    return MagentoCustomer(
       id: json['id'],
       email: json['email'],
       firstName: json['firstname'],
@@ -49,13 +49,13 @@ class Customer {
       isSubscribed: json['extension_attributes']?['is_subscribed'],
       addresses: json['addresses'] != null
           ? (json['addresses'] as List)
-              .map((a) => Address.fromJson(a))
+              .map((a) => MagentoAddress.fromJson(a))
               .toList()
           : null,
       defaultBilling: json['default_billing'],
       defaultShipping: json['default_shipping'],
       extensionAttributes: json['extension_attributes'] != null
-          ? CustomerExtensionAttributes.fromJson(json['extension_attributes'])
+          ? MagentoCustomerExtensionAttributes.fromJson(json['extension_attributes'])
           : null,
     );
   }
@@ -83,7 +83,7 @@ class Customer {
 }
 
 /// Customer address model
-class Address {
+class MagentoAddress {
   final int? id;
   final String? firstName;
   final String? lastName;
@@ -102,7 +102,7 @@ class Address {
   final bool? defaultBilling;
   final bool? defaultShipping;
 
-  Address({
+  MagentoAddress({
     this.id,
     this.firstName,
     this.lastName,
@@ -122,8 +122,8 @@ class Address {
     this.defaultShipping,
   });
 
-  factory Address.fromJson(Map<String, dynamic> json) {
-    return Address(
+  factory MagentoAddress.fromJson(Map<String, dynamic> json) {
+    return MagentoAddress(
       id: json['id'],
       firstName: json['firstname'],
       lastName: json['lastname'],
@@ -170,17 +170,17 @@ class Address {
 }
 
 /// Extension attributes for customer
-class CustomerExtensionAttributes {
+class MagentoCustomerExtensionAttributes {
   final bool? isSubscribed;
   final Map<String, dynamic>? additionalAttributes;
 
-  CustomerExtensionAttributes({
+  MagentoCustomerExtensionAttributes({
     this.isSubscribed,
     this.additionalAttributes,
   });
 
-  factory CustomerExtensionAttributes.fromJson(Map<String, dynamic> json) {
-    return CustomerExtensionAttributes(
+  factory MagentoCustomerExtensionAttributes.fromJson(Map<String, dynamic> json) {
+    return MagentoCustomerExtensionAttributes(
       isSubscribed: json['is_subscribed'],
       additionalAttributes: json,
     );

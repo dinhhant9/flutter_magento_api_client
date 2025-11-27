@@ -34,7 +34,7 @@ class CustomerService {
   }
 
   /// Customer sign up
-  Future<Customer> signUp({
+  Future<MagentoCustomer> signUp({
     required String email,
     required String password,
     required String firstName,
@@ -59,7 +59,7 @@ class CustomerService {
       requiresAuth: false,
     );
 
-    final customer = Customer.fromJson(response);
+    final customer = MagentoCustomer.fromJson(response);
     
     // Auto login after signup
     if (customer.email != null) {
@@ -70,23 +70,23 @@ class CustomerService {
   }
 
   /// Get current customer information
-  Future<Customer?> getCurrentCustomer() async {
+  Future<MagentoCustomer?> getCurrentCustomer() async {
     try {
       final response = await _client.get(ApiEndpoints.customerMe);
-      return Customer.fromJson(response);
+      return MagentoCustomer.fromJson(response);
     } catch (e) {
       return null;
     }
   }
 
   /// Get customer by ID
-  Future<Customer> getCustomerById(int customerId) async {
+  Future<MagentoCustomer> getCustomerById(int customerId) async {
     final response = await _client.get('${ApiEndpoints.customers}/$customerId');
-    return Customer.fromJson(response);
+    return MagentoCustomer.fromJson(response);
   }
 
   /// Update customer information
-  Future<Customer> updateCustomer(Customer customer) async {
+  Future<MagentoCustomer> updateCustomer(MagentoCustomer customer) async {
     final customerId = await StorageManager.getCustomerId();
     if (customerId == null) {
       throw Exception('Customer ID not found. Please login first.');
@@ -97,7 +97,7 @@ class CustomerService {
       body: customer.toJson(),
     );
 
-    return Customer.fromJson(response);
+    return MagentoCustomer.fromJson(response);
   }
 
   /// Change customer password

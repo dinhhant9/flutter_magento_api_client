@@ -1,117 +1,35 @@
-/// Category model
 class MagentoCategory {
-  final int? id;
-  final int? parentId;
-  final String? name;
-  final bool? isActive;
-  final int? position;
-  final int? level;
-  final String? path;
-  final int? productCount;
-  final List<MagentoCategory>? children;
-  final List<CategoryCustomAttribute>? customAttributes;
-  final CategoryExtensionAttributes? extensionAttributes;
+    MagentoCategory({
+        required this.id,
+        required this.parentId,
+        required this.name,
+        required this.isActive,
+        required this.position,
+        required this.level,
+        required this.productCount,
+        required this.childrenData,
+    });
 
-  MagentoCategory({
-    this.id,
-    this.parentId,
-    this.name,
-    this.isActive,
-    this.position,
-    this.level,
-    this.path,
-    this.productCount,
-    this.children,
-    this.customAttributes,
-    this.extensionAttributes,
-  });
+    final int? id;
+    final int? parentId;
+    final String? name;
+    final bool? isActive;
+    final int? position;
+    final int? level;
+    final int? productCount;
+    final List<MagentoCategory> childrenData;
 
-  factory MagentoCategory.fromJson(Map<String, dynamic> json) {
-    return MagentoCategory(
-      id: json['id'],
-      parentId: json['parent_id'],
-      name: json['name'],
-      isActive: json['is_active'],
-      position: json['position'],
-      level: json['level'],
-      path: json['path'],
-      productCount: json['product_count'],
-      children: json['children_data'] != null
-          ? (json['children_data'] as List)
-              .map((c) => MagentoCategory.fromJson(c))
-              .toList()
-          : null,
-      customAttributes: json['custom_attributes'] != null
-          ? (json['custom_attributes'] as List)
-              .map((a) => CategoryCustomAttribute.fromJson(a))
-              .toList()
-          : null,
-      extensionAttributes: json['extension_attributes'] != null
-          ? CategoryExtensionAttributes.fromJson(json['extension_attributes'])
-          : null,
-    );
-  }
+    factory MagentoCategory.fromJson(Map<String, dynamic> json){ 
+        return MagentoCategory(
+            id: json["id"],
+            parentId: json["parent_id"],
+            name: json["name"],
+            isActive: json["is_active"],
+            position: json["position"],
+            level: json["level"],
+            productCount: json["product_count"],
+            childrenData: json["children_data"] == null ? [] : List<MagentoCategory>.from(json["children_data"]!.map((x) => MagentoCategory.fromJson(x))),
+        );
+    }
 
-  Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
-      if (parentId != null) 'parent_id': parentId,
-      if (name != null) 'name': name,
-      if (isActive != null) 'is_active': isActive,
-      if (position != null) 'position': position,
-      if (level != null) 'level': level,
-      if (path != null) 'path': path,
-      if (productCount != null) 'product_count': productCount,
-      if (children != null)
-        'children_data': children!.map((c) => c.toJson()).toList(),
-      if (customAttributes != null)
-        'custom_attributes':
-            customAttributes!.map((a) => a.toJson()).toList(),
-    };
-  }
 }
-
-/// Custom attribute model for category
-class CategoryCustomAttribute {
-  final String attributeCode;
-  final dynamic value;
-
-  CategoryCustomAttribute({
-    required this.attributeCode,
-    this.value,
-  });
-
-  factory CategoryCustomAttribute.fromJson(Map<String, dynamic> json) {
-    return CategoryCustomAttribute(
-      attributeCode: json['attribute_code'],
-      value: json['value'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'attribute_code': attributeCode,
-      if (value != null) 'value': value,
-    };
-  }
-}
-
-/// Extension attributes for category
-class CategoryExtensionAttributes {
-  final Map<String, dynamic>? additionalAttributes;
-
-  CategoryExtensionAttributes({
-    this.additionalAttributes,
-  });
-
-  factory CategoryExtensionAttributes.fromJson(Map<String, dynamic> json) {
-    return CategoryExtensionAttributes(
-      additionalAttributes: json,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return additionalAttributes ?? {};
-  }
-}
-
