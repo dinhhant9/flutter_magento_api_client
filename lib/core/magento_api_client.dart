@@ -14,6 +14,7 @@ import '../services/checkout_service.dart';
 import '../services/customer_service.dart';
 import '../services/order_service.dart';
 import '../services/product_service.dart';
+import '../storage/storage_manager.dart';
 
 /// High-level facade that bundles every Magento service into a single class.
 class MagentoApiClient {
@@ -52,10 +53,24 @@ class MagentoApiClient {
 
   MagentoCustomer? _currentCustomer;
   MagentoCart? _currentCart;
+  String? _currentCartId;
 
   bool get isInitialized => _isInitialized;
   MagentoCustomer? get currentCustomer => _currentCustomer;
   MagentoCart? get currentCart => _currentCart;
+  String? get currentCartId => _currentCartId;
+
+  /// Fetch the current cart ID from storage based on login status.
+  /// Returns the customer cart ID if logged in, otherwise returns the guest cart ID.
+  Future<String?> getCurrentCartId() async {
+    final isLoggedIn = await _customerService.isLoggedIn();
+    if (isLoggedIn) {
+      _currentCartId = await StorageManager.getCartId();
+    } else {
+      _currentCartId = await StorageManager.getGuestCartId();
+    }
+    return _currentCartId;
+  }
 
   /// Initialize the underlying network client and return a ready-to-use facade.
   /// Initialize the underlying network client and return the singleton.
@@ -88,9 +103,15 @@ class MagentoApiClient {
       final isLoggedIn = await _customerService.isLoggedIn();
       if (isLoggedIn) {
         _currentCustomer = await _customerService.getCurrentCustomer();
+        // Load customer cart ID from storage
+        _currentCartId = await StorageManager.getCartId();
+      } else {
+        // Load guest cart ID from storage
+        _currentCartId = await StorageManager.getGuestCartId();
       }
     } catch (_) {
       _currentCustomer = null;
+      _currentCartId = null;
     }
 
     try {
