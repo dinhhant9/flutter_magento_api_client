@@ -85,7 +85,10 @@ class MagentoApiClient {
 
   Future<void> _loadSessionData() async {
     try {
-      _currentCustomer = await _customerService.getCurrentCustomer();
+      final isLoggedIn = await _customerService.isLoggedIn();
+      if (isLoggedIn) {
+        _currentCustomer = await _customerService.getCurrentCustomer();
+      }
     } catch (_) {
       _currentCustomer = null;
     }
@@ -363,10 +366,7 @@ class MagentoApiClient {
   // Category APIs
   // ---------------------------------------------------------------------------
 
-  Future<MagentoCategory> getCategories({
-    int? pageSize,
-    int? currentPage,
-  }) {
+  Future<MagentoCategory> getCategories({int? pageSize, int? currentPage}) {
     _ensureInitialized();
     return _categoryService.getCategories(
       pageSize: pageSize,

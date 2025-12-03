@@ -62,10 +62,12 @@ class NetworkClient {
         : config.baseUrl;
     client._authType = config.authType;
     client._adminToken = config.adminToken;
-    client._timeout = config.timeout ?? const Duration(seconds: ApiConstants.defaultTimeout);
+    client._timeout =
+        config.timeout ?? const Duration(seconds: ApiConstants.defaultTimeout);
 
     if (config.authType == AuthType.oauth1) {
-      if (config.oauthConsumerKey == null || config.oauthConsumerSecret == null) {
+      if (config.oauthConsumerKey == null ||
+          config.oauthConsumerSecret == null) {
         throw ApiException('OAuth1 requires consumerKey and consumerSecret');
       }
       // TODO: Implement OAuth1 signing
@@ -75,7 +77,9 @@ class NetworkClient {
       client._oauthConsumerSecret = config.oauthConsumerSecret;
       client._oauthToken = config.oauthToken;
       client._oauthTokenSecret = config.oauthTokenSecret;
-      throw ApiException('OAuth1 authentication is not yet implemented. Please use Admin Token or Guest access.');
+      throw ApiException(
+        'OAuth1 authentication is not yet implemented. Please use Admin Token or Guest access.',
+      );
     }
 
     // Initialize storage
@@ -102,6 +106,11 @@ class NetworkClient {
   /// Get current customer token
   Future<String?> getCustomerToken() async {
     return await StorageManager.getUserToken();
+  }
+
+  Future<bool> isLoggedIn() async {
+    final token = await StorageManager.getUserToken();
+    return token != null && token.isNotEmpty;
   }
 
   /// Build full URL
@@ -145,7 +154,7 @@ class NetworkClient {
     bool requiresAuth = true,
   }) async {
     var url = _buildUrl(endpoint);
-    
+
     if (queryParameters != null && queryParameters.isNotEmpty) {
       final uri = Uri.parse(url);
       url = uri.replace(queryParameters: queryParameters).toString();
@@ -233,4 +242,3 @@ class NetworkClient {
     return ResponseHandler.handleResponse(response);
   }
 }
-

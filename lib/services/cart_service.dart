@@ -21,17 +21,23 @@ class CartService {
 
   /// Get guest cart
   Future<MagentoCart> getGuestCart([String? cartId]) async {
-    final id = cartId ?? await StorageManager.getGuestCartId();
-    if (id == null) {
-      throw Exception('Cart ID not found. Please create a cart first.');
+    String? id = cartId ?? await StorageManager.getGuestCartId();
+    id ??= await createGuestCart();
+
+    try {
+      final response = await _client.get(
+        ApiEndpoints.guestCart(id),
+        requiresAuth: false,
+      );
+      return MagentoCart.fromJson(response);
+    } catch (e) {
+      final newId = await createGuestCart();
+      final response = await _client.get(
+        ApiEndpoints.guestCart(newId),
+        requiresAuth: false,
+      );
+      return MagentoCart.fromJson(response);
     }
-
-    final response = await _client.get(
-      ApiEndpoints.guestCart(id),
-      requiresAuth: false,
-    );
-
-    return MagentoCart.fromJson(response);
   }
 
   /// Add item to guest cart
@@ -48,10 +54,7 @@ class CartService {
     final response = await _client.post(
       ApiEndpoints.guestCartItems(id),
       body: {
-        'cartItem': {
-          'sku': sku,
-          'qty': qty,
-        },
+        'cartItem': {'sku': sku, 'qty': qty},
       },
       requiresAuth: false,
     );
@@ -73,10 +76,7 @@ class CartService {
     final response = await _client.put(
       ApiEndpoints.guestCartItem(id, itemId),
       body: {
-        'cartItem': {
-          'item_id': itemId,
-          'qty': qty,
-        },
+        'cartItem': {'item_id': itemId, 'qty': qty},
       },
       requiresAuth: false,
     );
@@ -106,7 +106,7 @@ class CartService {
   Future<MagentoCart> getCustomerCart() async {
     final response = await _client.get(ApiEndpoints.cartMine);
     final cart = MagentoCart.fromJson(response);
-    
+
     if (cart.id != null) {
       await StorageManager.saveCartId(cart.id.toString());
     }
@@ -118,7 +118,7 @@ class CartService {
   Future<MagentoCart> createCustomerCart() async {
     final response = await _client.post(ApiEndpoints.carts);
     final cart = MagentoCart.fromJson(response);
-    
+
     if (cart.id != null) {
       await StorageManager.saveCartId(cart.id.toString());
     }
@@ -134,10 +134,7 @@ class CartService {
     final response = await _client.post(
       '${ApiEndpoints.cartMine}/items',
       body: {
-        'cartItem': {
-          'sku': sku,
-          'qty': qty,
-        },
+        'cartItem': {'sku': sku, 'qty': qty},
       },
     );
 
@@ -157,10 +154,7 @@ class CartService {
     final response = await _client.put(
       ApiEndpoints.cartItem(cartId, itemId),
       body: {
-        'cartItem': {
-          'item_id': itemId,
-          'qty': qty,
-        },
+        'cartItem': {'item_id': itemId, 'qty': qty},
       },
     );
 
@@ -180,8 +174,8 @@ class CartService {
 
   /// Get current cart (automatically detects guest or customer)
   Future<MagentoCart> getCurrentCart() async {
-    final isLoggedIn = await _client.getCustomerToken() != null;
-    
+    final isLoggedIn = await _client.isLoggedIn();
+
     if (isLoggedIn) {
       return getCustomerCart();
     }
@@ -193,18 +187,15 @@ class CartService {
     required String sku,
     required int qty,
   }) async {
-    final isLoggedIn = await _client.getCustomerToken() != null;
-    
+    final isLoggedIn = await _client.isLoggedIn();
+
     if (isLoggedIn) {
       return addItemToCustomerCart(sku: sku, qty: qty);
     } else {
       // Ensure guest cart exists
       var cartId = await StorageManager.getGuestCartId();
-      if (cartId == null) {
-        cartId = await createGuestCart();
-      }
+      cartId ??= await createGuestCart();
       return addItemToGuestCart(sku: sku, qty: qty, cartId: cartId);
     }
   }
 }
-
