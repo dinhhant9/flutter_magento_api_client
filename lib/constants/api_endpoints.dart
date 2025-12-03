@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base endpoints
   static const String customers = '/rest/default/V1/customers';
   static const String customerMe = '/rest/default/V1/customers/me';
-  static const String customerToken = '/rest/default/V1/customers/login';
+  static const String customerToken = '/rest/V1/integration/customer/token';
   static const String customerCreate = '/rest/default/V1/customers';
   static const String customerPassword = '/rest/default/V1/customers/password';
   static const String customerResetPassword =
