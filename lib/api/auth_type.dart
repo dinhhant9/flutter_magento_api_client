@@ -8,8 +8,4 @@ enum AuthType {
   
   /// Guest access (no authentication)
   guest,
-  
-  /// Customer token authentication (after login)
-  customerToken,
 }
-

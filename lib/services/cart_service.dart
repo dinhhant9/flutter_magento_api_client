@@ -104,19 +104,27 @@ class CartService {
 
   /// Get customer cart (for logged-in users)
   Future<MagentoCart> getCustomerCart() async {
-    final response = await _client.get(ApiEndpoints.cartMine);
-    final cart = MagentoCart.fromJson(response);
+    try {
+      final response = await _client.get(ApiEndpoints.cartMine);
+      final cart = MagentoCart.fromJson(response);
 
-    if (cart.id != null) {
-      await StorageManager.saveCartId(cart.id.toString());
+      if (cart.id != null) {
+        await StorageManager.saveCartId(cart.id.toString());
+      }
+
+      return cart;
+    } catch (e) {
+      final cart = await createCustomerCart();
+      if (cart.id != null) {
+        await StorageManager.saveCartId(cart.id.toString());
+      }
+      return cart;
     }
-
-    return cart;
   }
 
   /// Create customer cart
   Future<MagentoCart> createCustomerCart() async {
-    final response = await _client.post(ApiEndpoints.carts);
+    final response = await _client.post(ApiEndpoints.cartMine);
     final cart = MagentoCart.fromJson(response);
 
     if (cart.id != null) {

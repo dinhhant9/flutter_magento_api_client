@@ -91,7 +91,6 @@ class NetworkClient {
 
   /// Set customer token (after login)
   Future<void> setCustomerToken(String token) async {
-    _authType = AuthType.customerToken;
     await StorageManager.saveUserToken(token);
   }
 
@@ -131,7 +130,7 @@ class NetworkClient {
     if (requiresAuth) {
       if (_authType == AuthType.adminToken && _adminToken != null) {
         headers['Authorization'] = 'Bearer $_adminToken';
-      } else if (_authType == AuthType.customerToken) {
+      } else {
         final token = await StorageManager.getUserToken();
         if (token != null) {
           headers['Authorization'] = 'Bearer $token';

@@ -331,6 +331,8 @@ class MagentoApiClient {
     _ensureInitialized();
     final cart = await _cartService.getCurrentCart();
     _currentCart = cart;
+    final cartId = await getCurrentCartId();
+    _currentCartId = cartId;
     return cart;
   }
 
